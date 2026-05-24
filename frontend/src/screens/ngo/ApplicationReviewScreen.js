@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Linking, Modal, Platform, TextInput } from 'react-native';
 import Screen from '../../components/common/Screen';
 import Button from '../../components/common/Button';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { 
   ArrowLeft, 
   User, 
@@ -627,92 +627,32 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
         </Modal>
 
         {/* ─── DATE PICKER OVERLAY (Mobile) ─── */}
-        {Platform.OS !== 'web' && showDatePicker && (
-          <Modal
-            visible={showDatePicker}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowDatePicker(false)}
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => setShowDatePicker(false)}
-              className="flex-1 bg-black/50 justify-end"
-              style={{ flex: 1 }}
-            >
-              <View className="bg-white rounded-t-3xl overflow-hidden" style={{ marginTop: 'auto' }}>
-                <View className="p-4 border-b border-slate-200 flex-row justify-between items-center">
-                  <Text className="text-sm font-poppins-600 text-text-primary">Select Date</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowDatePicker(false)}
-                    className="p-2"
-                  >
-                    <X size={20} color="#0F172A" />
-                  </TouchableOpacity>
-                </View>
-                <DateTimePicker
-                  value={interviewDate}
-                  mode="date"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(event, date) => {
-                    if (date) {
-                      handleDateChange(date);
-                      if (Platform.OS !== 'ios') {
-                        setShowDatePicker(false);
-                      }
-                    } else if (Platform.OS !== 'ios') {
-                      setShowDatePicker(false);
-                    }
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-          </Modal>
-        )}
+        <DateTimePickerModal
+          isVisible={Platform.OS !== 'web' && showDatePicker}
+          mode="date"
+          date={interviewDate}
+          onConfirm={(date) => {
+            handleDateChange(date);
+            setShowDatePicker(false);
+          }}
+          onCancel={() => setShowDatePicker(false)}
+          headerTextIOS="Choose interview date"
+          isDarkModeEnabled={false}
+        />
 
         {/* ─── TIME PICKER OVERLAY (Mobile) ─── */}
-        {Platform.OS !== 'web' && showTimePicker && (
-          <Modal
-            visible={showTimePicker}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowTimePicker(false)}
-          >
-            <TouchableOpacity
-              activeOpacity={1}
-              onPress={() => setShowTimePicker(false)}
-              className="flex-1 bg-black/50 justify-end"
-              style={{ flex: 1 }}
-            >
-              <View className="bg-white rounded-t-3xl overflow-hidden" style={{ marginTop: 'auto' }}>
-                <View className="p-4 border-b border-slate-200 flex-row justify-between items-center">
-                  <Text className="text-sm font-poppins-600 text-text-primary">Select Time</Text>
-                  <TouchableOpacity
-                    onPress={() => setShowTimePicker(false)}
-                    className="p-2"
-                  >
-                    <X size={20} color="#0F172A" />
-                  </TouchableOpacity>
-                </View>
-                <DateTimePicker
-                  value={interviewTime}
-                  mode="time"
-                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                  onChange={(event, time) => {
-                    if (time) {
-                      handleTimeChange(time);
-                      if (Platform.OS !== 'ios') {
-                        setShowTimePicker(false);
-                      }
-                    } else if (Platform.OS !== 'ios') {
-                      setShowTimePicker(false);
-                    }
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-          </Modal>
-        )}
+        <DateTimePickerModal
+          isVisible={Platform.OS !== 'web' && showTimePicker}
+          mode="time"
+          date={interviewTime}
+          onConfirm={(time) => {
+            handleTimeChange(time);
+            setShowTimePicker(false);
+          }}
+          onCancel={() => setShowTimePicker(false)}
+          headerTextIOS="Choose interview time"
+          isDarkModeEnabled={false}
+        />
 
       {/* ─── CV FILE PREVIEW MODAL ─── */}
       <Modal
