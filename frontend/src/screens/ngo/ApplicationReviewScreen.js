@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Linking, Modal, Platform, TextInput } from 'react-native';
 import Screen from '../../components/common/Screen';
 import Button from '../../components/common/Button';
-import DatePicker from 'react-native-date-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { 
   ArrowLeft, 
@@ -478,13 +477,17 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                   </TouchableOpacity>
                   
                   {Platform.OS === 'web' ? (
-                    <View className="mt-3 bg-white border border-slate-200 rounded-2xl p-4">
-                      <DatePicker
-                        date={interviewDate}
-                        onDateChange={handleDateChange}
-                        mode="date"
-                      />
-                    </View>
+                    <TextInput
+                      style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
+                      type="date"
+                      value={interviewDate.toISOString().split('T')[0]}
+                      onChangeText={(text) => {
+                        if (text) {
+                          const date = new Date(text + 'T00:00:00');
+                          handleDateChange(date);
+                        }
+                      }}
+                    />
                   ) : (
                     showDatePicker && (
                       <DateTimePicker
@@ -516,13 +519,19 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                   </TouchableOpacity>
                   
                   {Platform.OS === 'web' ? (
-                    <View className="mt-3 bg-white border border-slate-200 rounded-2xl p-4">
-                      <DatePicker
-                        date={interviewTime}
-                        onDateChange={handleTimeChange}
-                        mode="time"
-                      />
-                    </View>
+                    <TextInput
+                      style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
+                      type="time"
+                      value={interviewTime.getHours().toString().padStart(2, '0') + ':' + interviewTime.getMinutes().toString().padStart(2, '0')}
+                      onChangeText={(text) => {
+                        if (text) {
+                          const [hours, minutes] = text.split(':');
+                          const newTime = new Date(interviewTime);
+                          newTime.setHours(parseInt(hours), parseInt(minutes));
+                          handleTimeChange(newTime);
+                        }
+                      }}
+                    />
                   ) : (
                     showTimePicker && (
                       <DateTimePicker
