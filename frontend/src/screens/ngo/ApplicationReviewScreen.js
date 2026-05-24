@@ -117,7 +117,18 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
       Alert.alert('Success', `Application moved to ${status}`);
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to update status');
+      console.error('Error updating status:', error);
+      let errorMessage = error.message || 'Failed to update status';
+      
+      if (error.response?.status === 403) {
+        errorMessage = 'You do not have permission to update this application. Make sure you are logged in as the NGO that posted this job.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Application not found.';
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      
+      Alert.alert('Error', errorMessage);
     } finally {
       setActionLoading(false);
     }
@@ -459,12 +470,16 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
               </View>
 
               {/* Form Fields */}
-              <ScrollView className="p-6 max-h-[450px]">
+              <ScrollView className="p-6 max-h-[450px]" scrollEnabled={!showDatePicker && !showTimePicker}>
                 {/* Date Picker */}
                 <View className="mb-4">
                   <Text className="text-slate-600 font-bold text-xs mb-2">Interview Date</Text>
                   <TouchableOpacity
-                    onPress={() => setShowDatePicker(true)}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      console.log('Date picker pressed');
+                      setShowDatePicker(true);
+                    }}
                     className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}
                   >
                     <View className="flex-row items-center flex-1">
@@ -495,7 +510,11 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                 <View className="mb-4">
                   <Text className="text-slate-600 font-bold text-xs mb-2">Interview Time</Text>
                   <TouchableOpacity
-                    onPress={() => setShowTimePicker(true)}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      console.log('Time picker pressed');
+                      setShowTimePicker(true);
+                    }}
                     className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}
                   >
                     <View className="flex-row items-center flex-1">
@@ -609,26 +628,90 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
 
         {/* ─── DATE PICKER OVERLAY (Mobile) ─── */}
         {Platform.OS !== 'web' && showDatePicker && (
-          <DateTimePicker
-            value={interviewDate}
-            mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(event, date) => {
-              if (date) handleDateChange(date);
-            }}
-          />
+          <Modal
+            visible={showDatePicker}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowDatePicker(false)}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setShowDatePicker(false)}
+              className="flex-1 bg-black/50 justify-end"
+              style={{ flex: 1 }}
+            >
+              <View className="bg-white rounded-t-3xl overflow-hidden" style={{ marginTop: 'auto' }}>
+                <View className="p-4 border-b border-slate-200 flex-row justify-between items-center">
+                  <Text className="text-sm font-poppins-600 text-text-primary">Select Date</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowDatePicker(false)}
+                    className="p-2"
+                  >
+                    <X size={20} color="#0F172A" />
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={interviewDate}
+                  mode="date"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(event, date) => {
+                    if (date) {
+                      handleDateChange(date);
+                      if (Platform.OS !== 'ios') {
+                        setShowDatePicker(false);
+                      }
+                    } else if (Platform.OS !== 'ios') {
+                      setShowDatePicker(false);
+                    }
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
         )}
 
         {/* ─── TIME PICKER OVERLAY (Mobile) ─── */}
         {Platform.OS !== 'web' && showTimePicker && (
-          <DateTimePicker
-            value={interviewTime}
-            mode="time"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-            onChange={(event, time) => {
-              if (time) handleTimeChange(time);
-            }}
-          />
+          <Modal
+            visible={showTimePicker}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowTimePicker(false)}
+          >
+            <TouchableOpacity
+              activeOpacity={1}
+              onPress={() => setShowTimePicker(false)}
+              className="flex-1 bg-black/50 justify-end"
+              style={{ flex: 1 }}
+            >
+              <View className="bg-white rounded-t-3xl overflow-hidden" style={{ marginTop: 'auto' }}>
+                <View className="p-4 border-b border-slate-200 flex-row justify-between items-center">
+                  <Text className="text-sm font-poppins-600 text-text-primary">Select Time</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowTimePicker(false)}
+                    className="p-2"
+                  >
+                    <X size={20} color="#0F172A" />
+                  </TouchableOpacity>
+                </View>
+                <DateTimePicker
+                  value={interviewTime}
+                  mode="time"
+                  display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                  onChange={(event, time) => {
+                    if (time) {
+                      handleTimeChange(time);
+                      if (Platform.OS !== 'ios') {
+                        setShowTimePicker(false);
+                      }
+                    } else if (Platform.OS !== 'ios') {
+                      setShowTimePicker(false);
+                    }
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          </Modal>
         )}
 
       {/* ─── CV FILE PREVIEW MODAL ─── */}

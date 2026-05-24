@@ -264,15 +264,28 @@ class NgoApplicationDetailView(generics.RetrieveAPIView):
 
 class NgoApproveApplicationView(views.APIView):
     """Approve application — supports shortlisted, interview, hired."""
-    permission_classes = [IsNGOUser]
+    permission_classes = [IsAdminOrNGOOwner]
 
     def post(self, request, pk, *args, **kwargs):
-        try:
-            application = Application.objects.select_related("job", "applicant").get(
-                pk=pk, job__posted_by=request.user
+        # Check if user is authenticated
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {"detail": "Authentication required. Please log in."},
+                status=status.HTTP_401_UNAUTHORIZED
             )
+
+        try:
+            if request.user.role == User.Roles.ADMIN:
+                application = Application.objects.select_related("job", "applicant").get(pk=pk)
+            else:
+                application = Application.objects.select_related("job", "applicant").get(
+                    pk=pk, job__posted_by=request.user
+                )
         except Application.DoesNotExist:
-            return Response({"detail": "Application not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"detail": "Application not found. Make sure you are the owner of the job this application belongs to."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
         new_status = request.data.get("status", Application.Status.INTERVIEW).lower()
         
