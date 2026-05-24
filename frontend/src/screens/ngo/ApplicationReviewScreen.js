@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Linking, Modal, Platform, TextInput } from 'react-native';
 import Screen from '../../components/common/Screen';
 import Button from '../../components/common/Button';
+import DatePicker from 'react-native-date-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { 
   ArrowLeft, 
   User, 
@@ -32,11 +34,15 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
 
   // Interview modal states
   const [showInterviewModal, setShowInterviewModal] = useState(false);
-  const [interviewDate, setInterviewDate] = useState('');
-  const [interviewTime, setInterviewTime] = useState('');
+  const [interviewDate, setInterviewDate] = useState(new Date());
+  const [interviewTime, setInterviewTime] = useState(new Date());
   const [interviewPlatform, setInterviewPlatform] = useState('Google Meet');
   const [interviewLink, setInterviewLink] = useState('');
   const [interviewMessage, setInterviewMessage] = useState('');
+
+  // Picker visibility states
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   // Input focus states for sleek UI outline highlights
   const [isDateFocused, setIsDateFocused] = useState(false);
@@ -64,6 +70,38 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDateChange = (date) => {
+    setInterviewDate(date);
+    if (Platform.OS !== 'web') {
+      setShowDatePicker(false);
+    }
+  };
+
+  const handleTimeChange = (time) => {
+    setInterviewTime(time);
+    if (Platform.OS !== 'web') {
+      setShowTimePicker(false);
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const formatTime = (time) => {
+    if (!time) return '';
+    return new Date(time).toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   const handleUpdateStatus = async (status, details = {}) => {
@@ -349,7 +387,14 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
             />
             <Button
               title="Interview"
-              onPress={() => setShowInterviewModal(true)}
+              onPress={() => {
+                setInterviewDate(new Date());
+                setInterviewTime(new Date());
+                setInterviewPlatform('Google Meet');
+                setInterviewLink('');
+                setInterviewMessage('');
+                setShowInterviewModal(true);
+              }}
               isLoading={actionLoading}
               className="flex-1 shadow-sm"
               icon={<Calendar size={18} color="white" />}
@@ -416,36 +461,80 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
 
               {/* Form Fields */}
               <ScrollView className="p-6 max-h-[450px]">
-                {/* Date */}
+                {/* Date Picker */}
                 <View className="mb-4">
-                  <Text className="text-slate-600 font-bold text-xs mb-2">Date (e.g. YYYY-MM-DD or MM/DD/YYYY)</Text>
-                  <View className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}>
-                    <TextInput
-                      style={[{ borderWidth: 0, backgroundColor: 'transparent', flex: 1, fontSize: 13, color: '#1E293B' }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
-                      placeholder="Enter interview date"
-                      placeholderTextColor="#94A3B8"
-                      value={interviewDate}
-                      onChangeText={setInterviewDate}
-                      onFocus={() => setIsDateFocused(true)}
-                      onBlur={() => setIsDateFocused(false)}
-                    />
-                  </View>
+                  <Text className="text-slate-600 font-bold text-xs mb-2">Interview Date</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowDatePicker(true)}
+                    className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <Calendar size={16} color="#6366F1" />
+                      <Text className="text-sm font-poppins-600 text-text-primary ml-3">
+                        {formatDate(interviewDate) || 'Select date'}
+                      </Text>
+                    </View>
+                    <Text className="text-slate-400 text-lg">›</Text>
+                  </TouchableOpacity>
+                  
+                  {Platform.OS === 'web' ? (
+                    <View className="mt-3 bg-white border border-slate-200 rounded-2xl p-4">
+                      <DatePicker
+                        date={interviewDate}
+                        onDateChange={handleDateChange}
+                        mode="date"
+                      />
+                    </View>
+                  ) : (
+                    showDatePicker && (
+                      <DateTimePicker
+                        value={interviewDate}
+                        mode="date"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={(event, date) => {
+                          if (date) handleDateChange(date);
+                        }}
+                      />
+                    )
+                  )}
                 </View>
 
-                {/* Time */}
+                {/* Time Picker */}
                 <View className="mb-4">
-                  <Text className="text-slate-600 font-bold text-xs mb-2">Time (e.g. 2:00 PM)</Text>
-                  <View className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}>
-                    <TextInput
-                      style={[{ borderWidth: 0, backgroundColor: 'transparent', flex: 1, fontSize: 13, color: '#1E293B' }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
-                      placeholder="Enter interview time"
-                      placeholderTextColor="#94A3B8"
-                      value={interviewTime}
-                      onChangeText={setInterviewTime}
-                      onFocus={() => setIsTimeFocused(true)}
-                      onBlur={() => setIsTimeFocused(false)}
-                    />
-                  </View>
+                  <Text className="text-slate-600 font-bold text-xs mb-2">Interview Time</Text>
+                  <TouchableOpacity
+                    onPress={() => setShowTimePicker(true)}
+                    className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}
+                  >
+                    <View className="flex-row items-center flex-1">
+                      <Clock size={16} color="#6366F1" />
+                      <Text className="text-sm font-poppins-600 text-text-primary ml-3">
+                        {formatTime(interviewTime) || 'Select time'}
+                      </Text>
+                    </View>
+                    <Text className="text-slate-400 text-lg">›</Text>
+                  </TouchableOpacity>
+                  
+                  {Platform.OS === 'web' ? (
+                    <View className="mt-3 bg-white border border-slate-200 rounded-2xl p-4">
+                      <DatePicker
+                        date={interviewTime}
+                        onDateChange={handleTimeChange}
+                        mode="time"
+                      />
+                    </View>
+                  ) : (
+                    showTimePicker && (
+                      <DateTimePicker
+                        value={interviewTime}
+                        mode="time"
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={(event, time) => {
+                          if (time) handleTimeChange(time);
+                        }}
+                      />
+                    )
+                  )}
                 </View>
 
                 {/* Platform */}
@@ -510,13 +599,13 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                 <TouchableOpacity
                   onPress={() => {
                     if (!interviewDate || !interviewTime) {
-                      Alert.alert('Error', 'Please fill in date and time.');
+                      Alert.alert('Error', 'Please select both date and time.');
                       return;
                     }
                     setShowInterviewModal(false);
                     handleUpdateStatus('Interview', {
-                      date: interviewDate,
-                      time: interviewTime,
+                      date: formatDate(interviewDate),
+                      time: formatTime(interviewTime),
                       platform: interviewPlatform,
                       location_or_link: interviewLink,
                       message: interviewMessage,
