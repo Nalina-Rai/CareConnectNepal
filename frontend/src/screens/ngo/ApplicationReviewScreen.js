@@ -476,7 +476,7 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                     <Text className="text-slate-400 text-lg">›</Text>
                   </TouchableOpacity>
                   
-                  {Platform.OS === 'web' ? (
+                  {Platform.OS === 'web' && (
                     <TextInput
                       style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
                       type="date"
@@ -488,17 +488,6 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                         }
                       }}
                     />
-                  ) : (
-                    showDatePicker && (
-                      <DateTimePicker
-                        value={interviewDate}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={(event, date) => {
-                          if (date) handleDateChange(date);
-                        }}
-                      />
-                    )
                   )}
                 </View>
 
@@ -518,7 +507,7 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                     <Text className="text-slate-400 text-lg">›</Text>
                   </TouchableOpacity>
                   
-                  {Platform.OS === 'web' ? (
+                  {Platform.OS === 'web' && (
                     <TextInput
                       style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
                       type="time"
@@ -532,17 +521,6 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                         }
                       }}
                     />
-                  ) : (
-                    showTimePicker && (
-                      <DateTimePicker
-                        value={interviewTime}
-                        mode="time"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={(event, time) => {
-                          if (time) handleTimeChange(time);
-                        }}
-                      />
-                    )
                   )}
                 </View>
 
@@ -628,6 +606,30 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
             </View>
           </View>
         </Modal>
+
+        {/* ─── DATE PICKER OVERLAY (Mobile) ─── */}
+        {Platform.OS !== 'web' && showDatePicker && (
+          <DateTimePicker
+            value={interviewDate}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(event, date) => {
+              if (date) handleDateChange(date);
+            }}
+          />
+        )}
+
+        {/* ─── TIME PICKER OVERLAY (Mobile) ─── */}
+        {Platform.OS !== 'web' && showTimePicker && (
+          <DateTimePicker
+            value={interviewTime}
+            mode="time"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(event, time) => {
+              if (time) handleTimeChange(time);
+            }}
+          />
+        )}
 
       {/* ─── CV FILE PREVIEW MODAL ─── */}
       <Modal
