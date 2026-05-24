@@ -137,7 +137,7 @@ const RegisterScreen = ({ navigation }) => {
   return (
     <Screen className="flex-1 bg-background" safeArea={true} fullWidth={true} noPadding={true}>
       {/* TopAppBar */}
-      <View className="flex-row items-center px-4 py-4 bg-white/90 border-b border-outline-variant z-50">
+      <View className="flex-row items-center px-4 py-4 border-b border-outline-variant z-50" style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
         <TouchableOpacity onPress={() => step === 2 ? setStep(1) : navigation.goBack()} className="mr-3 p-2 rounded-full hover:bg-slate-100">
           <MaterialIcons name="arrow-back" size={24} color="#6366F1" />
         </TouchableOpacity>
@@ -166,13 +166,32 @@ const RegisterScreen = ({ navigation }) => {
                 <TouchableOpacity
                   activeOpacity={0.9}
                   onPress={() => handleChange('role', 'caregiver')}
-                  className={`flex-1 bg-white border ${formData.role === 'caregiver' ? 'border-primary ring-2 ring-primary/20' : 'border-outline-variant'} p-8 rounded-xl shadow-sm relative overflow-hidden`}
+                  className="flex-1 bg-white border p-8 rounded-xl relative overflow-hidden"
+                  style={[
+                    formData.role === 'caregiver'
+                      ? { borderColor: '#6366F1', borderWidth: 1 }
+                      : { borderColor: '#CBD5E1', borderWidth: 1 },
+                    {
+                      shadowColor: '#94A3B8',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 4,
+                      elevation: 2,
+                    }
+                  ]}
                 >
                   <View className="absolute top-0 right-0 p-4 opacity-[0.03]">
                     <MaterialIcons name="work" size={120} color={formData.role === 'caregiver' ? '#6366F1' : '#0F172A'} />
                   </View>
                   <View className="flex-col items-start gap-4 relative z-10">
-                    <View className={`w-16 h-16 rounded-full flex items-center justify-center ${formData.role === 'caregiver' ? 'bg-primary text-white' : 'bg-primary-fixed text-primary'}`}>
+                    <View 
+                      className="w-16 h-16 rounded-full flex items-center justify-center"
+                      style={
+                        formData.role === 'caregiver'
+                          ? { backgroundColor: '#6366F1' }
+                          : { backgroundColor: '#EEF2FF' }
+                      }
+                    >
                       <MaterialIcons name="work" size={32} color={formData.role === 'caregiver' ? '#ffffff' : '#6366F1'} />
                     </View>
                     <View>
@@ -188,13 +207,32 @@ const RegisterScreen = ({ navigation }) => {
                 <TouchableOpacity
                   activeOpacity={0.9}
                   onPress={() => handleChange('role', 'ngo')}
-                  className={`flex-1 bg-white border ${formData.role === 'ngo' ? 'border-secondary ring-2 ring-secondary/20' : 'border-outline-variant'} p-8 rounded-xl shadow-sm relative overflow-hidden`}
+                  className="flex-1 bg-white border p-8 rounded-xl relative overflow-hidden"
+                  style={[
+                    formData.role === 'ngo'
+                      ? { borderColor: '#485f84', borderWidth: 1 }
+                      : { borderColor: '#CBD5E1', borderWidth: 1 },
+                    {
+                      shadowColor: '#94A3B8',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 4,
+                      elevation: 2,
+                    }
+                  ]}
                 >
                   <View className="absolute top-0 right-0 p-4 opacity-[0.03]">
                     <MaterialIcons name="apartment" size={120} color={formData.role === 'ngo' ? '#485f84' : '#0F172A'} />
                   </View>
                   <View className="flex-col items-start gap-4 relative z-10">
-                    <View className={`w-16 h-16 rounded-full flex items-center justify-center ${formData.role === 'ngo' ? 'bg-secondary text-white' : 'bg-secondary-container text-secondary'}`}>
+                    <View 
+                      className="w-16 h-16 rounded-full flex items-center justify-center"
+                      style={
+                        formData.role === 'ngo'
+                          ? { backgroundColor: '#485f84' }
+                          : { backgroundColor: '#F0F4F8' }
+                      }
+                    >
                       <MaterialIcons name="apartment" size={32} color={formData.role === 'ngo' ? '#ffffff' : '#485f84'} />
                     </View>
                     <View>
@@ -210,8 +248,15 @@ const RegisterScreen = ({ navigation }) => {
               {/* Action Section */}
               <View className="flex-col items-center gap-6">
                 <TouchableOpacity 
-                  className="bg-primary px-16 py-4 rounded-lg shadow-md flex-row items-center justify-center"
+                  className="bg-primary px-16 py-4 rounded-lg flex-row items-center justify-center"
                   onPress={handleNextStep}
+                  style={{
+                    shadowColor: '#6366F1',
+                    shadowOffset: { width: 0, height: 4 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 6,
+                    elevation: 3,
+                  }}
                 >
                   <Text className="text-white text-sm uppercase tracking-widest font-semibold" style={{ fontFamily: 'Inter_600SemiBold' }}>
                     Continue
@@ -260,7 +305,16 @@ const RegisterScreen = ({ navigation }) => {
                 </Text>
               </View>
 
-              <View className="bg-white rounded-xl border border-outline-variant p-6 shadow-sm relative overflow-hidden">
+              <View 
+                className="bg-white rounded-xl border border-outline-variant p-6 relative overflow-hidden"
+                style={{
+                  shadowColor: '#94A3B8',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }}
+              >
                 <View className="absolute top-0 right-0 opacity-[0.03]">
                   <MaterialIcons name="filter-hdr" size={150} color="#6366F1" />
                 </View>
@@ -423,9 +477,16 @@ const RegisterScreen = ({ navigation }) => {
 
                   {/* CTA */}
                   <TouchableOpacity 
-                    className="w-full bg-[#6366F1] py-4 rounded-lg shadow-md flex-row items-center justify-center mt-2"
+                    className="w-full bg-[#6366F1] py-4 rounded-lg flex-row items-center justify-center mt-2"
                     onPress={handleRegister}
                     disabled={isLoading}
+                    style={{
+                      shadowColor: '#6366F1',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 6,
+                      elevation: 3,
+                    }}
                   >
                     <Text className="text-white font-semibold text-lg mr-2" style={{ fontFamily: 'Poppins_600SemiBold' }}>
                       {isLoading ? 'Processing...' : 'Create Account'}

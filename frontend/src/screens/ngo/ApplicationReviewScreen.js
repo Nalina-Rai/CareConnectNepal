@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Linking, Modal, Platform, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, ActivityIndicator, Linking, Modal, Platform, TextInput, KeyboardAvoidingView } from 'react-native';
 import Screen from '../../components/common/Screen';
 import Button from '../../components/common/Button';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
@@ -145,7 +145,8 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
   if (!application) return null;
 
   return (
-    <Screen scrollable className="bg-background">
+    <View style={{ flex: 1 }}>
+      <Screen scrollable className="bg-background">
       {/* Header */}
       <View className="px-6 pt-4 flex-row items-center justify-between mb-6">
         <TouchableOpacity 
@@ -443,15 +444,12 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           ) : null}
         </View>
+      </Screen>
 
-        {/* ─── INTERVIEW SCHEDULE MODAL ─── */}
-        <Modal
-          visible={showInterviewModal}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowInterviewModal(false)}
-        >
-          <View className="flex-1 bg-slate-950/80 justify-center items-center p-6">
+      {/* ─── INTERVIEW SCHEDULE MODAL ─── */}
+      {showInterviewModal && (
+        <View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, zIndex: 100, elevation: 10, backgroundColor: 'rgba(2, 6, 23, 0.8)', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ width: '100%', alignItems: 'center' }}>
             <View className="bg-white w-full max-w-lg rounded-[32px] overflow-hidden border border-border shadow-2xl">
               {/* Header */}
               <View className="flex-row justify-between items-center p-5 border-b border-slate-100 bg-slate-50">
@@ -474,72 +472,100 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                 {/* Date Picker */}
                 <View className="mb-4">
                   <Text className="text-slate-600 font-bold text-xs mb-2">Interview Date</Text>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      console.log('Date picker pressed');
-                      setShowDatePicker(true);
-                    }}
-                    className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}
-                  >
-                    <View className="flex-row items-center flex-1">
+                  {Platform.OS === 'web' ? (
+                    <View className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}>
                       <Calendar size={16} color="#6366F1" />
-                      <Text className="text-sm font-poppins-600 text-text-primary ml-3">
-                        {formatDate(interviewDate) || 'Select date'}
-                      </Text>
+                      <input
+                        type="date"
+                        value={interviewDate.getFullYear() + '-' + String(interviewDate.getMonth() + 1).padStart(2, '0') + '-' + String(interviewDate.getDate()).padStart(2, '0')}
+                        onChange={(e) => {
+                          const text = e.target.value;
+                          if (text) {
+                            const date = new Date(text + 'T00:00:00');
+                            handleDateChange(date);
+                          }
+                        }}
+                        style={{
+                          borderWidth: 0,
+                          backgroundColor: 'transparent',
+                          flex: 1,
+                          fontSize: '14px',
+                          color: '#1e293b',
+                          marginLeft: '12px',
+                          outline: 'none',
+                          border: 'none',
+                          fontFamily: 'inherit',
+                          width: '100%'
+                        }}
+                        onFocus={() => setIsDateFocused(true)}
+                        onBlur={() => setIsDateFocused(false)}
+                      />
                     </View>
-                    <Text className="text-slate-400 text-lg">›</Text>
-                  </TouchableOpacity>
-                  
-                  {Platform.OS === 'web' && (
-                    <TextInput
-                      style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
-                      type="date"
-                      value={interviewDate.toISOString().split('T')[0]}
-                      onChangeText={(text) => {
-                        if (text) {
-                          const date = new Date(text + 'T00:00:00');
-                          handleDateChange(date);
-                        }
-                      }}
-                    />
+                  ) : (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => setShowDatePicker(true)}
+                      className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isDateFocused ? 'border-primary' : 'border-slate-200'}`}
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Calendar size={16} color="#6366F1" />
+                        <Text className="text-sm font-poppins-600 text-text-primary ml-3">
+                          {formatDate(interviewDate) || 'Select date'}
+                        </Text>
+                      </View>
+                      <Text className="text-slate-400 text-lg">›</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
 
                 {/* Time Picker */}
                 <View className="mb-4">
                   <Text className="text-slate-600 font-bold text-xs mb-2">Interview Time</Text>
-                  <TouchableOpacity
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      console.log('Time picker pressed');
-                      setShowTimePicker(true);
-                    }}
-                    className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}
-                  >
-                    <View className="flex-row items-center flex-1">
+                  {Platform.OS === 'web' ? (
+                    <View className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}>
                       <Clock size={16} color="#6366F1" />
-                      <Text className="text-sm font-poppins-600 text-text-primary ml-3">
-                        {formatTime(interviewTime) || 'Select time'}
-                      </Text>
+                      <input
+                        type="time"
+                        value={interviewTime.getHours().toString().padStart(2, '0') + ':' + interviewTime.getMinutes().toString().padStart(2, '0')}
+                        onChange={(e) => {
+                          const text = e.target.value;
+                          if (text) {
+                            const [hours, minutes] = text.split(':');
+                            const newTime = new Date(interviewTime);
+                            newTime.setHours(parseInt(hours), parseInt(minutes));
+                            handleTimeChange(newTime);
+                          }
+                        }}
+                        style={{
+                          borderWidth: 0,
+                          backgroundColor: 'transparent',
+                          flex: 1,
+                          fontSize: '14px',
+                          color: '#1e293b',
+                          marginLeft: '12px',
+                          outline: 'none',
+                          border: 'none',
+                          fontFamily: 'inherit',
+                          width: '100%'
+                        }}
+                        onFocus={() => setIsTimeFocused(true)}
+                        onBlur={() => setIsTimeFocused(false)}
+                      />
                     </View>
-                    <Text className="text-slate-400 text-lg">›</Text>
-                  </TouchableOpacity>
-                  
-                  {Platform.OS === 'web' && (
-                    <TextInput
-                      style={[{ borderWidth: 1, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', padding: 12, borderRadius: 12, fontSize: 14, color: '#1e293b', marginTop: 12 }, Platform.OS === 'web' && { outlineStyle: 'none' }]}
-                      type="time"
-                      value={interviewTime.getHours().toString().padStart(2, '0') + ':' + interviewTime.getMinutes().toString().padStart(2, '0')}
-                      onChangeText={(text) => {
-                        if (text) {
-                          const [hours, minutes] = text.split(':');
-                          const newTime = new Date(interviewTime);
-                          newTime.setHours(parseInt(hours), parseInt(minutes));
-                          handleTimeChange(newTime);
-                        }
-                      }}
-                    />
+                  ) : (
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => setShowTimePicker(true)}
+                      className={`border rounded-2xl bg-slate-50 px-4 py-3 flex-row items-center justify-between ${isTimeFocused ? 'border-primary' : 'border-slate-200'}`}
+                    >
+                      <View className="flex-row items-center flex-1">
+                        <Clock size={16} color="#6366F1" />
+                        <Text className="text-sm font-poppins-600 text-text-primary ml-3">
+                          {formatTime(interviewTime) || 'Select time'}
+                        </Text>
+                      </View>
+                      <Text className="text-slate-400 text-lg">›</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
 
@@ -623,8 +649,9 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
                 </TouchableOpacity>
               </View>
             </View>
-          </View>
-        </Modal>
+          </KeyboardAvoidingView>
+        </View>
+      )}
 
         {/* ─── DATE PICKER OVERLAY (Mobile) ─── */}
         <DateTimePickerModal
@@ -638,6 +665,7 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
           onCancel={() => setShowDatePicker(false)}
           headerTextIOS="Choose interview date"
           isDarkModeEnabled={false}
+          textColor="black"
         />
 
         {/* ─── TIME PICKER OVERLAY (Mobile) ─── */}
@@ -652,6 +680,7 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
           onCancel={() => setShowTimePicker(false)}
           headerTextIOS="Choose interview time"
           isDarkModeEnabled={false}
+          textColor="black"
         />
 
       {/* ─── CV FILE PREVIEW MODAL ─── */}
@@ -804,7 +833,7 @@ const ApplicationReviewScreen = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-    </Screen>
+    </View>
   );
 };
 

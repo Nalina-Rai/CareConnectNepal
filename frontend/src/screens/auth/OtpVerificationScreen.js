@@ -8,6 +8,12 @@ import { Alert } from 'react-native';
 
 
 const OtpVerificationScreen = ({ route, navigation }) => {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   const verifyOtp = useAuthStore((s) => s.verifyOtp);
   const register = useAuthStore((s) => s.register);
   const phone = route?.params?.phone || '+977 98XXXXXXX';
@@ -80,14 +86,18 @@ const OtpVerificationScreen = ({ route, navigation }) => {
       const registrationData = route.params?.registrationData;
       if (registrationData) {
         await register(registrationData);
-      }
-      
-      setIsLoading(false);
-      
-      // 3. For legacy flow without registrationData, manually go to KycSubmit.
-      // For registration, register() sets user and logs in, prompting navigator redirection.
-      if (!registrationData) {
-        navigation.navigate('KycSubmit');
+        // Note: successful registration sets isAuthenticated to true in Zustand,
+        // which immediately unmounts this stack screen in RootNavigator.
+        // We skip setting loading state or calling navigation to avoid unmounted context errors.
+      } else {
+        setIsLoading(false);
+        // For legacy/other flows, only navigate to KycSubmit if authenticated, otherwise fallback to Login
+        const isAuthenticated = useAuthStore.getState().isAuthenticated;
+        if (isAuthenticated) {
+          navigation.navigate('KycSubmit');
+        } else {
+          navigation.navigate('Login');
+        }
       }
     } catch (err) {
       setIsLoading(false);
@@ -120,10 +130,16 @@ const OtpVerificationScreen = ({ route, navigation }) => {
           We've sent a 6-digit verification code to
         </Text>
         <Text
-          className="text-base text-text-primary mb-10"
+          className="text-base text-text-primary mb-3"
           style={{ fontFamily: 'Poppins_600SemiBold' }}
         >
           {phone}
+        </Text>
+        <Text
+          className="text-sm text-primary mb-8"
+          style={{ fontFamily: 'Poppins_500Medium' }}
+        >
+          Please also check your registered email inbox or spam folder for the verification code.
         </Text>
 
         <View className="flex-row justify-between mb-10">
@@ -131,10 +147,14 @@ const OtpVerificationScreen = ({ route, navigation }) => {
             <TextInput
               key={index}
               ref={(ref) => (inputRefs.current[index] = ref)}
-              className={`w-12 h-16 border-2 rounded-xl text-center text-2xl
-                ${digit ? 'border-primary bg-primary/5 text-primary' : 'border-border bg-white text-text-primary'}
-              `}
-              style={[{ fontFamily: 'Poppins_600SemiBold' }, Platform.OS === 'web' && { outlineStyle: 'none', borderWidth: 0, backgroundColor: 'transparent' }]}
+              className="w-12 h-16 border-2 rounded-xl text-center text-2xl"
+              style={[
+                { fontFamily: 'Poppins_600SemiBold' },
+                digit 
+                  ? { borderColor: '#6366F1', backgroundColor: 'rgba(99, 102, 241, 0.05)', color: '#6366F1' } 
+                  : { borderColor: '#CBD5E1', backgroundColor: '#FFFFFF', color: '#0F172A' },
+                Platform.OS === 'web' && { outlineStyle: 'none', borderWidth: 0, backgroundColor: 'transparent' }
+              ]}
               maxLength={1}
               keyboardType="number-pad"
               value={digit}
@@ -152,7 +172,7 @@ const OtpVerificationScreen = ({ route, navigation }) => {
           onPress={handleVerify}
           isLoading={isLoading}
           disabled={otp.join('').length < 6}
-          className="mb-8 shadow-md"
+          className="mb-8"
           size="lg"
         />
 

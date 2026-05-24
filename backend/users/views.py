@@ -467,15 +467,16 @@ class OTPRequestView(generics.CreateAPIView):
         bypass_email = os.getenv("BYPASS_EMAIL", "False") == "True"
         if email and not bypass_email:
             try:
+                from django.conf import settings
                 from django.core.mail import send_mail
                 send_mail(
                     subject="CareConnect Verification Code",
                     message=f"Your CareConnect OTP verification code is: {code}. Please use this code to complete your registration.",
-                    from_email=None,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[email],
                     fail_silently=False,
                 )
-                print(f"[SMTP] Successfully sent OTP email to {email}")
+                print(f"[SMTP] Successfully sent OTP email to {email} using sender {settings.DEFAULT_FROM_EMAIL}")
             except Exception as e:
                 print(f"[SMTP Error] Failed to send email to {email}: {e}")
         else:
