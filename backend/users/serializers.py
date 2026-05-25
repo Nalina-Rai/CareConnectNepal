@@ -311,3 +311,8 @@ class OTPSerializer(serializers.ModelSerializer):
         model = OTP
         fields = ["phone_number", "code"]
         read_only_fields = ["code"]
+
+    def validate_phone_number(self, value):
+        if value:
+            return "".join(ch for ch in str(value) if ch.isdigit() or ch == "+")
+        return value

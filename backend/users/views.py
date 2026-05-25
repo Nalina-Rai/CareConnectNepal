@@ -492,6 +492,8 @@ class OTPVerifyView(views.APIView):
     def post(self, request, *args, **kwargs):
         phone_number = request.data.get("phone_number")
         code = request.data.get("code")
+        if phone_number:
+            phone_number = "".join(ch for ch in str(phone_number) if ch.isdigit() or ch == "+")
         try:
             otp = OTP.objects.get(phone_number=phone_number, code=code, is_used=False)
         except OTP.DoesNotExist:
