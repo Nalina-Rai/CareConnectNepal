@@ -4,9 +4,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Explicitly load the .env file located at the project BASE_DIR so
+# settings like EMAIL_HOST_USER and EMAIL_HOST_PASSWORD are read.
+load_dotenv(str(BASE_DIR / ".env"))
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-secret-key-change-in-production")
 
